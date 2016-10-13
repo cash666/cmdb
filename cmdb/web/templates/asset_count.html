@@ -1,0 +1,68 @@
+{% extends "index.html" %}
+{% block header_css %}
+	<style>
+		table a:hover {
+                        cursor:pointer;
+                        color:red;
+                }
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped" border='1'>
+		  <thead>
+      		    <tr>
+		      <th>序号</th>
+                      <th>资产编号</th>
+                      <th>内网IP</th>
+                      <th>外网IP</th>
+                      <th>主机名</th>
+                      <th>厂商</th>
+                      <th>产品型号</th>
+                      <th>序列号</th>
+                      <th>CPU型号</th>
+                      <th>CPU线程数</th>
+                      <th>CPU物理核数</th>
+                      <th>内存大小</th>
+                      <th>硬盘大小</th>
+                      <th>操作系统</th>
+                      <th>操作</th>
+      		    </tr>
+                 </thead>
+                 <tbody>
+      		   {% for item in asset_obj %}
+        	     <tr><td>{{forloop.counter}}</td><td>{{item.asset_number}}</td><td>{{item.InnerIp}}</td><td>{{item.OuterIp}}</td><td>{{item.hostname}}</td><td>{{item.manufacturer}}</td><td>{{item.productname}}</td><td>{{item.sn}}</td><td>{{item.cpu_model}}</td><td>{{item.cpu_nums}}</td><td>{{item.cpu_cores}}</td><td>{{item.mem}}</td><td>{{item.disk}}</td><td>{{item.os}}</td><td><a onclick="delete_asset(this)">删除</a></td></tr>
+                   {% endfor %}
+                 </tbody>
+               </table>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+	<script>
+		function delete_asset(obj){
+			asset_number=$(obj).parent().siblings().eq(1).text();
+			$.ajax({
+				'type':'post',
+				'url':'/cmdb/delete_asset/',
+				'data':{'asset_number':asset_number,'csrfmiddlewaretoken':'{{ csrf_token }}'},
+				'success':function(data){
+					alert(data);
+					window.location.href=window.location.href;
+				}
+			})
+		}
+		if("{{message}}"){
+			alert("{{message}}");
+		}
+	  	$(function(){
+                        var url=window.location.href;
+                        if (url.indexOf('?')>0){
+                                position=url.indexOf('?');
+                                url=url.substring(0,position);
+                                window.location.href=url;
+                        }
+                })
+	</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "index.html" %}
+{% block content %}
+<div class="col-sm-offset-3 col-sm-3 col-sm-offset-6">
+	  <!--
+          <h1 class="page-header">Dashboard</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfsfdd
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              erewere
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sfsdfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+   	</div>
+	--!>
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped">
+                 <tbody>
+		     <form accept-charset="utf-8" action='/cmdb/modify_host/' method='post'>{% csrf_token %}
+			<input type='hidden' name='number' value={{host_info.number}} />
+        	     	<tr><td>内网IP</td><td>{{HostForm.InnerIp}}</td></tr>
+        	     	<tr><td>外网IP</td><td>{{HostForm.OuterIp}}</td></tr>
+        	     	<tr><td>主机名</td><td>{{HostForm.hostname}}</td></tr>
+        	     	<tr><td>运行服务</td><td>{{HostForm.application}}</td></tr>
+        	     	<tr><td>所在机房</td><td>{{HostForm.idc_name}}</td></tr>
+			<tr><td><input type='submit' value='提交' /></td><td><input type='reset' value='重置' /></td></tr>
+		     </form>
+                 </tbody>
+               </table>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+  <script>
+	//$('table').find(':text').eq(0).val('{{host_info.number}}');
+	$('table').find(':text').eq(0).val('{{host_info.InnerIp}}');
+	$('table').find(':text').eq(1).val('{{host_info.OuterIp}}');
+	$('table').find(':text').eq(2).val('{{host_info.hostname}}');
+	$('table').find(':text').eq(3).val('{{host_info.application}}');
+	$('table').find('select').eq(0).find('option').each(function(){
+		if($(this).text() == '{{host_info.idc_name.idc_name}}'){
+			$(this).attr('selected','selected');
+		}
+	})
+	if('{{message}}'){
+		alert('{{message}}');
+	}
+	$(function(){
+                var url=window.location.href;
+                if (url.indexOf('?message')>0){
+                        position=url.indexOf('?');
+                        url=url.substring(0,position);
+                        window.location.href=url;
+                }
+        })
+  </script>
+{% endblock %}

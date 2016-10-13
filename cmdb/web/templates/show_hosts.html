@@ -1,0 +1,55 @@
+{% extends "index.html" %}
+{% block header_css %}
+	<style>
+		table a:hover {
+                        cursor:pointer;
+                        color:red;
+                }
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	  <!--
+          <h1 class="page-header">Dashboard</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfsfdd
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              erewere
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sfsdfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+   	</div>
+	--!>
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped" border='1'>
+		  <thead>
+      		    <tr>
+		      <th>序号</th>
+                      <th>内网IP</th>
+                      <th>外网IP</th>
+      		    </tr>
+                 </thead>
+                 <tbody>
+      		   {% for item in hosts_list %}
+        	     <tr><td>{{forloop.counter}}</td><td>{{item.InnerIp}}</td><td>{{item.OuterIp}}</td></tr>
+                   {% endfor %}
+                 </tbody>
+               </table>
+	</div>
+</div>
+{% endblock %}

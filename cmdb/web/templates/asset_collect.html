@@ -1,0 +1,70 @@
+{% extends "index.html" %}
+{% block header_css %}
+	<style>
+		table a:hover {
+                        cursor:pointer;
+                        color:red;
+                }
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	  <!--
+            <div class="col-xs-6 col-sm-3 placeholder">
+              erewere
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sfsdfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+   	</div>
+	--!>
+	<div class="table-responsive" style='margin-top:10px'>
+	    <form action='/cmdb/asset_collect/' method='post'>{% csrf_token %}
+		<table class="table table-striped">
+                 <tbody>
+        	     <tr><td>主机 {{AssetCollectForm.hostname}}</td></tr>
+		     <tr><td><input type='submit' value='收集' /></td></tr>
+                 </tbody>
+               </table>
+            </form>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+	<script>
+		if("{{message}}"){
+                        alert("{{message}}");
+                }
+		var content="";
+		if("{{json_result}}"){
+			result="{{json_result}}";
+			result=result.replace('[','');
+			result=result.replace(']','');
+			result=result.replace(/&quot;/g,'');
+			console.log(result);
+			var arr_result=result.split(',');
+			for(var i in arr_result){
+				content+=arr_result[i]+'<br/>';
+			};
+		}
+		$('#show_result').html(content);
+		$(function(){
+                        var url=window.location.href;
+                        if (url.indexOf('?')>0){
+                                position=url.indexOf('?');
+                                url=url.substring(0,position);
+                                window.location.href=url;
+                        }
+                })
+	</script>
+{% endblock %}
+

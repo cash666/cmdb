@@ -1,0 +1,57 @@
+{% extends "index.html" %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	  <!--
+          <h1 class="page-header">Dashboard</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfsfdd
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              erewere
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sfsdfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+   	</div>
+	--!>
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped">
+                 <tbody>
+		     <form action='/cmdb/create_idc/' method='post'>{% csrf_token %}
+        	     	<tr><td>机房名称{{IDCForm.idc_name}}</td></tr>
+        	     	<tr><td>机房备注{{IDCForm.remark}}</td></tr>
+			<tr><td><input type='submit' value='提交' /><input type='reset' value='重置' style='margin-left:20px' /></td></tr>
+		     </form>
+                 </tbody>
+               </table>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+  <script>
+	if('{{message}}'){
+		alert('{{message}}');
+	}
+	$(function(){
+                var url=window.location.href;
+                if (url.indexOf('?')>0){
+                        position=url.indexOf('?');
+                        url=url.substring(0,position);
+                        window.location.href=url;
+                }
+        })
+  </script>
+{% endblock %}

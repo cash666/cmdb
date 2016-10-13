@@ -1,0 +1,98 @@
+{% extends "index.html" %}
+{% block header_css %}
+	<style>
+		table span:hover {
+			cursor:pointer;
+			color:red;
+		}
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	  <!--
+          <h1 class="page-header">Dashboard</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfsfdd
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              erewere
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sfsdfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+   	</div>
+	--!>
+	<a href='/cmdb/create_idc/'><input type='button' value='添加机房'/></a>
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped" border='1'>
+		  <thead>
+      		    <tr>
+                      <th>机房编号</th>
+                      <th>机房名称</th>
+                      <th>备注</th>
+                      <th>操作</th>
+      		    </tr>
+                 </thead>
+                 <tbody>
+      		   {% for item in idc_obj %}
+        	     <tr><td>{{item.id}}</td><td edited='1'>{{item.idc_name}}</td><td edited='1'>{{item.remark}}</td><td><span onclick='modify_idc(this)'>修改</span><span onclick='operate_idc(this,"/cmdb/save_idc/")' style='margin-left:10px'>保存</span><span onclick="operate_idc(this,'/cmdb/delete_idc/')" style='margin-left:10px'>删除</span></td></tr>
+                   {% endfor %}
+                 </tbody>
+               </table>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+	<script>
+		function modify_idc(obj){
+			if($(obj).hasClass('active')){
+					
+			} else {
+				$(obj).parent().parent().find('[edited="1"]').each(function(){
+					$(obj).addClass('active');
+					content=$(this).text();
+					$(this).html('<input type="text" value='+content+'>');
+				})		
+			}
+		}
+
+		function operate_idc(obj,url){
+			id=$(obj).parent().siblings().eq(0).text();
+			idc_name=$(obj).parent().siblings().eq(1).find(':text').val();
+			remark=$(obj).parent().siblings().eq(2).find(':text').val();
+			$.ajax({
+				'type':'post',
+				'url':url,
+				'data':{'id':id,'idc_name':idc_name,'remark':remark,'csrfmiddlewaretoken':'{{ csrf_token }}'},
+				'success':function(data){
+					alert(data);
+					window.location.href=window.location.href;
+				}
+			})
+		}
+		if("{{message}}"){
+			alert("{{message}}");
+		}
+		$(function(){
+                        var url=window.location.href;
+                        if (url.indexOf('?')>0){
+                                position=url.indexOf('?');
+                                url=url.substring(0,position);
+                                window.location.href=url;
+                        }
+                })
+	</script>
+{% endblock %}

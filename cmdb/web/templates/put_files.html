@@ -1,0 +1,98 @@
+{% extends "index.html" %}
+{% block header_css %}
+	<style>
+		table a:hover {
+                        cursor:pointer;
+                        color:red;
+                }
+		#show_result {
+                        width:500px;
+                        height:200px;
+                        overflow:auto;
+                        border:1px solid #ccc;
+                        font-weight:bold;
+                }
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	  <!--
+          <h1 class="page-header">Dashboard</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfsfdd
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              erewere
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sfsdfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+   	</div>
+	--!>
+	<form action="/cmdb/upload_files/" method='post' enctype="multipart/form-data" >{% csrf_token %}
+		<p><input type='file' name='uploadFile' /></p>
+		<p><input type='submit' value='上传文件' /></p>
+	</form>
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped">
+		  <form action='/cmdb/put_files/' method='post'>{% csrf_token %}
+                    <tbody>
+        	       <tr><td>批量主机 {{PutFileForm.host_groups}}</td></tr>
+        	       <tr><td>选择文件 {{PutFileForm.put_files}}</td></tr>
+        	       <tr><td>上传目录 {{PutFileForm.put_dir}}</td></tr>
+        	       <tr><td><input type='submit' values='上传' /></td></tr>
+                   </tbody>
+		 </form>
+               </table>
+	</div>
+	<h4 class="page-header">上传结果如下:</h4>
+
+        <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder" id='show_result'>
+
+            </div>
+        </div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+	<script>
+		var content="";
+		if("{{json_result}}"){
+			result="{{json_result}}";
+			result=result.replace('{','');
+			result=result.replace('}','');
+			result=result.replace(/&quot;/g,'');
+			arr_result=result.split(',');
+			for(var i in arr_result){
+				arr_result[i]=arr_result[i].replace('[','');
+				arr_result[i]=arr_result[i].replace(']','');
+                                content+="<p>"+arr_result[i]+"</p>";
+                        };
+		}
+		$('#show_result').html(content);
+		if("{{message}}"){
+                        alert("{{message}}");
+                }
+		$(function(){
+                        var url=window.location.href;
+                        if (url.indexOf('?')>0){
+                                position=url.indexOf('?');
+                                url=url.substring(0,position);
+                                window.location.href=url;
+                        }
+                })
+	</script>
+{% endblock %}

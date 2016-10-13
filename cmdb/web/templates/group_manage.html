@@ -1,0 +1,85 @@
+{% extends "index.html" %}
+{% block header_css %}
+	<style>
+		table a:hover {
+                        cursor:pointer;
+                        color:red;
+                }
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	  <!--
+          <h1 class="page-header">Dashboard</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfsfdd
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              erewere
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sfsdfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+   	</div>
+	--!>
+	<form action="/cmdb/create_group/" method='post'>{% csrf_token %}
+		<p>{{GroupForm.group_name}} <input type='submit' value='添加组' /></p>
+	</form>
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped" border='1'>
+		  <thead>
+      		    <tr>
+		      <th>序号</th>
+                      <th>组名</th>
+                      <th>操作</th>
+      		    </tr>
+                 </thead>
+                 <tbody>
+      		   {% for item in group_obj %}
+        	     <tr><td>{{forloop.counter}}</td><td>{{item.name}}</td><td><a href='/cmdb/show_hosts/?id={{item.id}}'>查看详情</a><a onclick="delete_group(this)" style='margin-left:10px'>删除</a></td></tr>
+                   {% endfor %}
+                 </tbody>
+               </table>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+	<script>
+		function delete_group(obj){
+			group_name=$(obj).parent().siblings().eq(1).text();
+			$.ajax({
+				'type':'post',
+				'url':'/cmdb/delete_group/',
+				'data':{'name':group_name,'csrfmiddlewaretoken':'{{ csrf_token }}'},
+				'success':function(data){
+					alert(data);
+					window.location.href=window.location.href;
+				}
+			})
+		}
+		if("{{message}}"){
+			alert("{{message}}");
+		}
+		$(function(){
+                        var url=window.location.href;
+                        if (url.indexOf('?')>0){
+                                position=url.indexOf('?');
+                                url=url.substring(0,position);
+                                window.location.href=url;
+                        }
+                })
+	</script>
+{% endblock %}
