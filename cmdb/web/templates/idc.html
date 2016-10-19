@@ -9,33 +9,10 @@
 {% endblock %}
 {% block content %}
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	  <!--
-          <h1 class="page-header">Dashboard</h1>
-
-          <div class="row placeholders">
-            <div class="col-xs-6 col-sm-3 placeholder">
-              sdsfsfdd
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              erewere
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              sdsfds
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              sfsdfds
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-   	</div>
-	--!>
 	<a href='/cmdb/create_idc/'><input type='button' value='添加机房'/></a>
+	<form action='/cmdb/idc/' method='post' style="margin-top:10px">{% csrf_token %}
+		<p>{{SearchIdcForm.search_idc}} <input type='submit' value='搜索' /></p>
+	</form>
 	<div class="table-responsive" style='margin-top:10px'>
 		<table class="table table-striped" border='1'>
 		  <thead>
@@ -47,11 +24,18 @@
       		    </tr>
                  </thead>
                  <tbody>
-      		   {% for item in idc_obj %}
-        	     <tr><td>{{item.id}}</td><td edited='1'>{{item.idc_name}}</td><td edited='1'>{{item.remark}}</td><td><span onclick='modify_idc(this)'>修改</span><span onclick='operate_idc(this,"/cmdb/save_idc/")' style='margin-left:10px'>保存</span><span onclick="operate_idc(this,'/cmdb/delete_idc/')" style='margin-left:10px'>删除</span></td></tr>
-                   {% endfor %}
+		   {% if search_idc_obj %}
+			{% for item in search_idc_obj %}
+			  <tr><td>{{item.id}}</td><td edited='1'>{{item.idc_name}}</td><td edited='1'>{{item.remark}}</td><td><span onclick='modify_idc(this)'>修改</span><span onclick='operate_idc(this,"/cmdb/save_idc/")' style='margin-left:10px'>保存</span><span onclick="operate_idc(this,'/cmdb/delete_idc/')" style='margin-left:10px'>删除</span></td></tr>
+		        {% endfor %}
+		   {% else %}
+      		     {% for item in idc_obj %}
+        	       <tr><td>{{item.id}}</td><td edited='1'>{{item.idc_name}}</td><td edited='1'>{{item.remark}}</td><td><span onclick='modify_idc(this)'>修改</span><span onclick='operate_idc(this,"/cmdb/save_idc/")' style='margin-left:10px'>保存</span><span onclick="operate_idc(this,'/cmdb/delete_idc/')" style='margin-left:10px'>删除</span></td></tr>
+                     {% endfor %}
+		   {% endif %}
                  </tbody>
                </table>
+	       <div style="float:right">{{pager_str}}</div>
 	</div>
 </div>
 {% endblock %}
@@ -88,7 +72,7 @@
 		}
 		$(function(){
                         var url=window.location.href;
-                        if (url.indexOf('?')>0){
+                        if (url.indexOf('?message')>0){
                                 position=url.indexOf('?');
                                 url=url.substring(0,position);
                                 window.location.href=url;

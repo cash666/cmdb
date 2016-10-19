@@ -80,7 +80,7 @@ DATABASES = {
         'NAME': 'cmdb_test',
         'USER':'cash',
         'PASSWORD':'12345',
-        'HOST':'192.168.47.154',
+        'HOST':'192.168.47.157',
         'PORT':3306,
     }
 }

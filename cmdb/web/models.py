@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 # Create your models here.
 
 class Idc(models.Model):
@@ -11,6 +12,7 @@ class Idc(models.Model):
 	'''
 	idc_name = models.CharField(max_length=40, verbose_name=u'机房名称')
 	remark = models.CharField(max_length=40, verbose_name=u'备注')
+	create_time=models.DateField(auto_now_add=True)
 
 	def __unicode__(self):
 		return self.idc_name
@@ -30,6 +32,7 @@ class HostList(models.Model):
 	group = models.ManyToManyField('Group',verbose_name=u'组名')
 	application = models.CharField(max_length=20, verbose_name=u'应用')
 	idc_name = models.ForeignKey(Idc)
+	create_time=models.DateField(auto_now_add=True)	
 
 	def __unicode__(self):
 		return self.number
@@ -56,6 +59,7 @@ class Assets(models.Model):
 	disk = models.CharField(max_length=300, verbose_name=u'硬盘大小')
 	os = models.CharField(max_length=20, verbose_name=u'操作系统')
 	token = models.CharField(max_length=20,default='cmdb',verbose_name=u'资产令牌')
+	create_time=models.DateField(auto_now_add=True)	
 
 	def __unicode__(self):        
 		return '%s' % self.hostname
@@ -64,8 +68,12 @@ class Assets(models.Model):
 		verbose_name = u'主机资产信息'        
 		verbose_name_plural = u'主机资产信息管理'
 
-class Group(models.Model):    
+class Group(models.Model):   
+	'''
+	主机组
+	''' 
 	name = models.CharField(max_length=50,unique=True)    
+	create_time=models.DateField(auto_now_add=True)
 
 	def __unicode__(self):        
 		return self.name    
@@ -74,7 +82,10 @@ class Group(models.Model):
 			verbose_name = u'主机组信息'        
 			verbose_name_plural = u'主机组信息管理'
 
-class Upload(models.Model):    
+class Upload(models.Model):
+	'''
+	文件上传
+	'''
 	headImg = models.FileField(upload_to = './uploads/')    
 
 	def __unicode__(self):        
@@ -85,6 +96,9 @@ class Upload(models.Model):
 		verbose_name_plural = u'文件上传'
 
 class Task(models.Model):
+	'''
+	定时任务
+	'''
 	task_name=models.CharField(max_length=64)
 	target_host=models.ManyToManyField(HostList)
 	task=models.CharField(max_length=64)
@@ -127,3 +141,20 @@ class UserGroup(models.Model):
 	class Meta:
                 verbose_name=u'用户组'
                 verbose_name_plural=u'用户组'
+
+class cmd_log(models.Model):
+	'''
+	日志表
+	'''
+	type=models.CharField(max_length=32)
+	name=models.CharField(max_length=32,default='')
+	hostname=models.CharField(max_length=32,default='')
+	cmd=models.CharField(max_length=64)
+	exec_time=models.DateTimeField(auto_now_add=True)
+
+	def __unicode__(self):
+		return ("%s,%s,%s") % (self.type,self.name,self.cmd)
+
+	class Meta:
+		verbose_name=u'日志表'
+                verbose_name_plural=u'日志表'

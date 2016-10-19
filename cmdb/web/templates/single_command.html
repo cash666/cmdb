@@ -58,11 +58,7 @@
 	<script>
 		var content="";
 		if("{{json_result}}"){
-			result="{{json_result}}";
-			result=result.replace('[','');
-			result=result.replace(']','');
-			result=result.replace(/&quot;/g,'');
-			var arr_result=result.split(',');
+			arr_result={{json_result|safe}};
 			for(var i in arr_result){
 				content+=arr_result[i]+'<br/>';
 			};

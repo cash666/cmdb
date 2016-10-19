@@ -43,4 +43,6 @@ urlpatterns = [
     url(r'^delete_task/',views.delete_task),
     url(r'^acc_logout/',views.acc_logout),
     url(r'^asset_collect/',views.asset_collect),
+    url(r'^export_asset/',views.export_asset),
+    url(r'^log_count/',views.log_count),
 ]

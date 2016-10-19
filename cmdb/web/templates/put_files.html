@@ -71,16 +71,10 @@
 	<script>
 		var content="";
 		if("{{json_result}}"){
-			result="{{json_result}}";
-			result=result.replace('{','');
-			result=result.replace('}','');
-			result=result.replace(/&quot;/g,'');
-			arr_result=result.split(',');
-			for(var i in arr_result){
-				arr_result[i]=arr_result[i].replace('[','');
-				arr_result[i]=arr_result[i].replace(']','');
-                                content+="<p>"+arr_result[i]+"</p>";
-                        };
+			result={{json_result|safe}};
+			$.each(result,function(k,v){
+                                content+="<p><span>"+k+":</span><span>"+v+"</span></p>";
+                        });
 		}
 		$('#show_result').html(content);
 		if("{{message}}"){

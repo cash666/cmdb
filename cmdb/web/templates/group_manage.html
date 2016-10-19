@@ -38,6 +38,9 @@
 	<form action="/cmdb/create_group/" method='post'>{% csrf_token %}
 		<p>{{GroupForm.group_name}} <input type='submit' value='添加组' /></p>
 	</form>
+	<form action="/cmdb/group_manage/" method='post'>{% csrf_token %}
+                <p>{{GroupSearchForm.group}} <input type='submit' value='查询' /></p>
+        </form>
 	<div class="table-responsive" style='margin-top:10px'>
 		<table class="table table-striped" border='1'>
 		  <thead>
@@ -48,11 +51,18 @@
       		    </tr>
                  </thead>
                  <tbody>
+		 {% if search_group_obj %}
+		   {% for item in search_group_obj %}
+		     <tr><td>{{forloop.counter}}</td><td>{{item.name}}</td><td><a href='/cmdb/show_hosts/?id={{item.id}}'>查看详情</a><a onclick="delete_group(this)" style='margin-left:10px'>删除</a></td></tr>
+		   {% endfor %}
+		 {% else %}
       		   {% for item in group_obj %}
         	     <tr><td>{{forloop.counter}}</td><td>{{item.name}}</td><td><a href='/cmdb/show_hosts/?id={{item.id}}'>查看详情</a><a onclick="delete_group(this)" style='margin-left:10px'>删除</a></td></tr>
                    {% endfor %}
+	         {% endif %}
                  </tbody>
                </table>
+	       <div style="float:right">{{pager_str}}</div>
 	</div>
 </div>
 {% endblock %}
@@ -75,7 +85,7 @@
 		}
 		$(function(){
                         var url=window.location.href;
-                        if (url.indexOf('?')>0){
+                        if (url.indexOf('?message')>0){
                                 position=url.indexOf('?');
                                 url=url.substring(0,position);
                                 window.location.href=url;

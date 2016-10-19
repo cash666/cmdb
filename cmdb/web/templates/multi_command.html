@@ -61,18 +61,17 @@
 	<script>
 		var content="";
 		if("{{json_result}}"){
-			result="{{json_result}}";
-			result=result.replace('{','');
-			result=result.replace('}','');
-			result=result.replace(/&quot;/g,'');
-			var arr_result=result.split(',');
+			result={{json_result|safe}};
 			content="<ul>";
-			for(var i in arr_result){
-				arr_result[i]=arr_result[i].replace('[','');
-				arr_result[i]=arr_result[i].replace(']','');
-				arr_result[i]=$.trim(arr_result[i]);
-				content+="<li>"+arr_result[i]+"</li>";
-			};
+			$.each(result,function(k,v){
+				content+="<li>"+k+":</li>";
+				content+="<ul>";
+				for(var i in v){
+					content+="<li style='color:green'>"+v[i]+"</li>"
+				}
+				content+="</ul>";
+				content+="<hr/>";
+			})
 			content+="</ul>";
 		}
 		$('#show_result').html(content);

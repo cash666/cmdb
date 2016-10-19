@@ -1,17 +1,25 @@
 {% extends "index.html" %}
+{% load formtags %}
 {% block header_css %}
 	<link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
         <link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-timepicker-addon.css" rel="stylesheet" />
 	<style>
-		table span:hover {
+		table span:hover,table a:hover {
 			cursor:pointer;
 			color:red;
 		}
+			
+		#desc {
+                        display:none;
+                }
 	</style>	
 {% endblock %}
 {% block content %}
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	<button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-md">添加任务</button>
+	<form action="/cmdb/task/" method='post' style="margin-top:10px">{% csrf_token %}
+                <p>{{SearchTaskForm.search_task}} <input type='submit' value='搜索' /></p>
+        </form>
 	<div class="modal fade bs-example-modal-md" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
   	  <div class="modal-dialog modal-md">
     	    <div class="modal-content">
@@ -55,7 +63,7 @@
             </div>
           </div>
        </div>
-	<div class="table-responsive" style='margin-top:10px'>
+	<div class="table-responsive" style='margin-top:10px' id='asc'>
 		<table class="table table-striped" border='1'>
 		  <thead>
       		    <tr>
@@ -65,17 +73,70 @@
                       <th>任务描述</th>
                       <th>执行时间</th>
                       <th>是否成功</th>
-                      <th>创建时间</th>
+                      <th><a id='reverse' onclick="ToggleSwitch()">创建时间</a></th>
                       <th>操作</th>
       		    </tr>
                  </thead>
                  <tbody>
-      		   {% for item in task_obj %}
-        	     <tr><td>{{forloop.counter}}</td><td>{{item.task_name}}</td><td>{% for item2 in item.target_host.all %} {{ item2.OuterIp }} {% endfor %}</td><td>{{item.task}}</td><td>{% if item.task_time %} {{item.task_time}} {% endif %}</td><td>{{item.is_finished}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td><span class='delete_task'>删除</span></td></tr>
-                   {% endfor %}
+		   {% if search_task_obj %}
+		     {% is_list search_task_obj as check_list %}
+		     {% if check_list %}
+		       {% for search_task_item in search_task_obj %}
+		         {% for item in search_task_item %}
+                           <tr><td>{{forloop.counter}}</td><td>{{item.task_name}}</td><td>{% for item2 in item.target_host.all %} {{ item2.OuterIp }} {% endfor %}</td><td>{{item.task}}</td><td>{% if item.task_time %} {{item.task_time}} {% endif %}</td><td>{{item.is_finished}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td><span class='delete_task'>删除</span></td></tr>
+			 {% endfor %}
+                       {% endfor %}
+		     {% else %}
+		       {% for item in search_task_obj %}
+		         <tr><td>{{forloop.counter}}</td><td>{{item.task_name}}</td><td>{% for item2 in item.target_host.all %} {{ item2.OuterIp }} {% endfor %}</td><td>{{item.task}}</td><td>{% if item.task_time %} {{item.task_time}} {% endif %}</td><td>{{item.is_finished}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td><span class='delete_task'>删除</span></td></tr>
+		       {% endfor %}
+		     {% endif %}
+		  {% else %}
+      		     {% for item in task_obj %}
+        	       <tr><td>{{forloop.counter}}</td><td>{{item.task_name}}</td><td>{% for item2 in item.target_host.all %} {{ item2.OuterIp }} {% endfor %}</td><td>{{item.task}}</td><td>{% if item.task_time %} {{item.task_time}} {% endif %}</td><td>{{item.is_finished}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td><span class='delete_task'>删除</span></td></tr>
+                     {% endfor %}
+		  {% endif %}
                  </tbody>
                </table>
+	       <div style="float:right">{{pager_str}}</div>
 	</div>
+	<div class="table-responsive" style='margin-top:10px' id='desc'>
+                <table class="table table-striped" border='1'>
+                  <thead>
+                    <tr>
+                      <th>序号</th>
+                      <th>任务名称</th>
+                      <th>目标主机</th>
+                      <th>任务描述</th>
+                      <th>执行时间</th>
+                      <th>是否成功</th>
+                      <th><a id='reverse' onclick="ToggleSwitch()">创建时间</a></th>
+                      <th>操作</th>
+                    </tr>
+                 </thead>
+                 <tbody>
+                   {% if search_task_obj %}
+                     {% is_list search_task_obj as check_list %}
+                     {% if check_list %}
+                       {% for search_task_item in search_task_obj %}
+                         {% for item in search_task_item  reversed %}
+                           <tr><td>{{forloop.counter}}</td><td>{{item.task_name}}</td><td>{% for item2 in item.target_host.all %} {{ item2.OuterIp }} {% endfor %}</td><td>{{item.task}}</td><td>{% if item.task_time %} {{item.task_time}} {% endif %}</td><td>{{item.is_finished}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td><span class='delete_task'>删除</span></td></tr>
+                         {% endfor %}
+                       {% endfor %}
+                     {% else %}
+                       {% for item in search_task_obj reversed %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_name}}</td><td>{% for item2 in item.target_host.all %} {{ item2.OuterIp }} {% endfor %}</td><td>{{item.task}}</td><td>{% if item.task_time %} {{item.task_time}} {% endif %}</td><td>{{item.is_finished}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td><span class='delete_task'>删除</span></td></tr>
+                       {% endfor %}
+                     {% endif %}
+                  {% else %}
+                     {% for item in task_obj reversed %}
+                       <tr><td>{{forloop.counter}}</td><td>{{item.task_name}}</td><td>{% for item2 in item.target_host.all %} {{ item2.OuterIp }} {% endfor %}</td><td>{{item.task}}</td><td>{% if item.task_time %} {{item.task_time}} {% endif %}</td><td>{{item.is_finished}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td><span class='delete_task'>删除</span></td></tr>
+                     {% endfor %}
+                  {% endif %}
+                 </tbody>
+               </table>
+               <div style="float:right">{{pager_str}}</div>
+        </div>
 </div>
 {% endblock %}
 {% block bottom_js %}
@@ -84,6 +145,19 @@
         <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-addon.js"></script>
         <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-zh-CN.js"></script>
 	<script>
+		var flag=true;
+                function ToggleSwitch(){
+                        if(flag){
+                                $('#desc').css('display','block');
+                                $('#asc').css('display','none');
+                                flag=false;
+                        } else {
+                                $('#asc').css('display','block');
+                                $('#desc').css('display','none');
+                                flag=true;
+                        }
+                }
+
 		$('.delete_task').click(function(){
 			task_name=$(this).parent().siblings().eq(1).text();
 			task=$(this).parent().siblings().eq(3).text();
@@ -103,7 +177,7 @@
 		}
 		$(function(){
 			var url=window.location.href;
-			if (url.indexOf('?')>0){
+			if (url.indexOf('?message')>0){
 				position=url.indexOf('?');
 				url=url.substring(0,position);
 				window.location.href=url;

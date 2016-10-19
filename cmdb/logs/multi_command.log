@@ -54,3 +54,31 @@ Tue Oct 11 13:14:43 2016 root exec free -m in 192.168.47.154
 Tue Oct 11 13:14:46 2016 root exec free -m in 192.168.47.152
 Thu Oct 13 05:27:03 2016 cash exec df -h in 192.168.47.154
 Thu Oct 13 05:27:06 2016 cash exec df -h in 192.168.47.153
+Thu Oct 13 12:27:52 2016 cash exec df -h in 192.168.47.154
+Thu Oct 13 12:27:55 2016 cash exec df -h in 192.168.47.153
+Fri Oct 14 04:51:41 2016 cash exec df -h in 192.168.47.154
+Fri Oct 14 04:51:44 2016 cash exec df -h in 192.168.47.153
+Fri Oct 14 04:52:54 2016 cash exec df -h in 192.168.47.154
+Fri Oct 14 04:52:57 2016 cash exec df -h in 192.168.47.153
+Fri Oct 14 04:57:52 2016 cash exec df -h in 192.168.47.154
+Fri Oct 14 04:57:55 2016 cash exec df -h in 192.168.47.153
+Fri Oct 14 05:00:05 2016 cash exec df -h in 192.168.47.154
+Fri Oct 14 05:00:09 2016 cash exec df -h in 192.168.47.153
+Fri Oct 14 05:00:48 2016 cash exec df -h in 192.168.47.154
+Fri Oct 14 05:00:51 2016 cash exec df -h in 192.168.47.153
+Fri Oct 14 05:01:51 2016 cash exec df -h in 192.168.47.154
+Fri Oct 14 05:01:54 2016 cash exec df -h in 192.168.47.153
+Fri Oct 14 05:02:46 2016 cash exec df -h in 192.168.47.154
+Fri Oct 14 05:02:49 2016 cash exec df -h in 192.168.47.153
+Sat Oct 15 03:55:31 2016 cash exec free -m in 192.168.47.154
+Sat Oct 15 03:55:34 2016 cash exec free -m in 192.168.47.153
+Tue Oct 18 07:10:06 2016 cash exec free -m in 192.168.47.154
+Tue Oct 18 07:10:09 2016 cash exec free -m in 192.168.47.153
+Tue Oct 18 07:14:11 2016 cash exec w in 172.16.16.101
+Tue Oct 18 07:14:12 2016 cash exec w in 192.168.47.157
+Tue Oct 18 13:41:39 2016 cash exec df -h in 172.16.16.101
+Tue Oct 18 13:41:48 2016 cash exec df -h in 192.168.47.157
+Tue Oct 18 14:19:46 2016 cash exec df -h in 192.168.47.154
+Tue Oct 18 14:19:49 2016 cash exec df -h in 192.168.47.153
+Tue Oct 18 14:20:23 2016 cash exec df -h in 172.16.16.101
+Tue Oct 18 14:20:31 2016 cash exec df -h in 192.168.47.157

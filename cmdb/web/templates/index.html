@@ -16,6 +16,13 @@
     <!-- Custom styles for this template -->
     <link href="/static/css/dashboard.css" rel="stylesheet">
     {% block header_css %}
+	<style>
+		#hosts_count,#assets_count,#idcs_count,#groups_count {
+			width:170px;
+			height:150px;
+			border:1px solid #ccc;
+		}	
+	</style>
     {% endblock %}
   </head>
 
@@ -35,9 +42,9 @@
           <ul class="nav navbar-nav navbar-right">
 	    {% if request.user.is_authenticated %}
                 <li class="dropdown">
-                        <a href="#" class="dropdown-toggle glyphicon glyphicon-user" data-toggle="dropdown">{{request.user.userprofile.name}} <span class="caret"></span></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class='glyphicon glyphicon-user'></span> {{request.user.userprofile.user}} <span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
-                                <li><a href="/cmdb/acc_logout/">注销</a></li>
+                                <li><a class='glyphicon glyphicon-log-out' href="/cmdb/acc_logout/">注销</a></li>
                         </ul>
                 </li>
             {% else %}
@@ -46,51 +53,64 @@
           </ul>
         </div>
       </div>
+      <marquee direction="right" behavior="scroll" scrollamount="3" scrolldelay="0" loop="-1" width='1350' height='20'>
+	<font style='color:red'>锲而不舍，金石可镂。</font>
+      </marquee>
     </nav>
 
-    <div class="container-fluid">
+    <div class="container-fluid" style='margin-top:20px'>
       <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
+        <div class="col-sm-3 col-md-2 sidebar" style='margin-top:20px'>
           <ul class="nav nav-sidebar" id="menu">
-            <li><a href="/cmdb/index/">控制台</a></li>
-            <li><a href="/cmdb/idc/">机房管理</a></li>
-            <li><a href="/cmdb/host/">主机管理</a></li>
-            <li><a href="/cmdb/asset_count/">资产审计</a></li>
-            <li><a href="/cmdb/asset_collect/">资产采集</a></li>
-            <li><a href="/cmdb/group_manage/">分组管理</a></li>
-            <li><a href="/cmdb/put_files/">文件推送</a></li>
-            <li><a href="/cmdb/single_command/">单台命令</a></li>
-            <li><a href="/cmdb/multi_command/">批量命令</a></li>
-            <li><a href="/cmdb/task/">任务流程</a></li>
+            <li><a href="/cmdb/index/"><span class='glyphicon glyphicon-dashboard'></span> 控制台</a></li>
+            <li><a href="/cmdb/idc/"><span class='glyphicon glyphicon-align-justify'></span> 机房管理</a></li>
+            <li><a href="/cmdb/host/"><span class='glyphicon glyphicon-th-list'></span> 主机管理</a></li>
+            <li><a href="/cmdb/asset_count/"><span class='glyphicon glyphicon-th'></span> 资产审计</a></li>
+            <li><a href="/cmdb/asset_collect/"><span class='glyphicon glyphicon-briefcase'></span> 资产采集</a></li>
+            <li><a href="/cmdb/group_manage/"><span class='glyphicon glyphicon-th-large'></span> 分组管理</a></li>
+            <li><a href="/cmdb/put_files/"><span class='glyphicon glyphicon-transfer'></span> 文件推送</a></li>
+            <li><a href="/cmdb/single_command/"><span class='glyphicon glyphicon-edit'></span> 单台命令</a></li>
+            <li><a href="/cmdb/multi_command/"><span class='glyphicon glyphicon-edit'></span> 批量命令</a></li>
+            <li><a href="/cmdb/task/"><span class='glyphicon glyphicon-tasks'></span> 任务流程</a></li>
+            <li><a href="/cmdb/log_count/"><span class='glyphicon glyphicon-th'></span> 日志审计</a></li>
           </ul>
         </div>
 	{% block content %}
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <h1 class="page-header">Dashboard</h1>
-
+          <h3 class="page-header">控制台</h3>
           <div class="row placeholders">
-            <div class="col-xs-6 col-sm-3 placeholder">
-	      sdsfsfdd
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
+            <div class="col-xs-6 col-sm-3 placeholder" id='hosts_count'>
+	      主机总数
+	      <hr/>
+              <a href='/cmdb/host/'><h4>{{hosts_count}}</h4></a>
+              <span class="text-muted">All Hosts</span>
             </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              erewere
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
+            <div class="col-xs-6 col-sm-3 placeholder" id='assets_count' style='margin-left:20px'>
+              资产总数
+	      <hr/>
+              <a href='/cmdb/asset_count/'><h4>{{assets_count}}</h4></a>
+              <span class="text-muted">All Assets</span>
             </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-	      sdsfds
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
+            <div class="col-xs-6 col-sm-3 placeholder" id='idcs_count' style='margin-left:20px'>
+	      机房总数
+	      <hr/>
+              <a href='/cmdb/idc/'><h4>{{idcs_count}}</h4></a>
+              <span class="text-muted">All Idcs</span>
             </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-	      sfsdfds
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
+            <div class="col-xs-6 col-sm-3 placeholder" id='groups_count' style='margin-left:20px'>
+	      业务线总数
+	      <hr/>
+              <a href='/cmdb/group_manage/'><h4>{{groups_count}}</h4></a>
+              <span class="text-muted">All Groups</span>
             </div>
           </div>
-
+	  <div>
+	    <h3 class="page-header">统计图</h3>
+	    <div class="row placeholders">
+		<div id="container" style="min-width:400px;height:400px"></div>
+	    </div>
+	  </div>
+	 <!--
           <h2 class="sub-header">Section title</h2>
           <div class="table-responsive">
             <table class="table table-striped">
@@ -107,6 +127,7 @@
               </tbody>
             </table>
           </div>
+	  !-->
         </div>
 	{% endblock %}
       </div>
@@ -117,5 +138,57 @@
     <script src="/static/js/docs.js"></script>
     <script src="/static/js/common.js"></script>
     {% block bottom_js %}
+	<script src="/static/js/highcharts.js"></script>
+	<script src="/static/js/exporting2.js"></script>
+	<script src="/static/js/sand-signika.js"></script>
+	<script>
+	$(function(){
+	   function GetDateStr(AddDayCount) { 
+		var dd = new Date(); 
+		dd.setDate(dd.getDate()+AddDayCount);//获取AddDayCount天后的日期 
+		var m = dd.getMonth()+1;//获取当前月份的日期 
+		var d = dd.getDate(); 
+		return m+"-"+d; 
+	   }
+	   
+	   var series_arr={{ json_series|safe }};
+	   ShowCharts(series_arr);
+	   function ShowCharts(series_arr){
+		$('#container').highcharts({
+        		title: {
+        		    text: '最近7天资产入库和主机添加统计折线图',
+        		    x: -20 //center
+        		},
+        		subtitle: {
+        		    text: 'Source: caoshuai.com',
+        		    x: -20
+        		},
+        		xAxis: {
+        		    categories: [GetDateStr(-6),GetDateStr(-5),GetDateStr(-4),GetDateStr(-3),GetDateStr(-2),GetDateStr(-1),GetDateStr(0)]
+        		},
+        		yAxis: {
+        		    title: {
+        		        text: 'Count(次数)'
+        		    },
+        		    plotLines: [{
+        		        value: 0,
+        		        width: 1,
+        		        color: '#808080'
+        		    }]
+        		},
+        		tooltip: {
+        		    valueSuffix: '次'
+        		},
+        		legend: {
+        		    layout: 'vertical',
+        		    align: 'right',
+        		    verticalAlign: 'middle',
+        		    borderWidth: 0
+        		},
+			series:series_arr,
+    		});
+            }
+	})
+	</script>
     {% endblock %}
  </body>

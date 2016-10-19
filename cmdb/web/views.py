@@ -1,20 +1,39 @@
 #coding:utf8
 from django.shortcuts import render,HttpResponse,redirect
+from django.db.models import Q
 from web import models
 from core import exec_cmd,upload
 from conf import config
 from cmdb import settings
+from pager import page
 from django.contrib.auth import authenticate,login,logout
-from web.forms import idc_form,host_form,group_form,single_command_form,put_file_form,multi_command_form,task_form,asset_collect_form
+from web.forms import idc_form,host_form,group_form,single_command_form,put_file_form,multi_command_form,task_form,asset_collect_form,group_search_form,search_host_form,search_idc_form,search_task_form,search_log_form
 import paramiko
 import multiprocessing
+import datetime
 import urllib
 import json
 import time
 import os
 import sys
 import pickle
+import csv
 # Create your views here.
+
+def paging(request,obj1,url,obj2):
+	current_page=int(request.GET.get('page',1))
+	count=obj1
+        page_nums=int(count)
+        quotient,reminder=divmod(page_nums,10)
+        if reminder>0:
+                pager_num=quotient+1
+        else:
+                pager_num=quotient   #3
+        p=page.pager(current_page)
+        pager_str=p.generate_pager_str(pager_num,"/cmdb/%s/?page=" % url)
+        pager_obj=obj2[p.start:p.end]
+	result=(pager_obj,pager_str)
+        return result
 
 def check_login():
         def decorator(func):
@@ -45,12 +64,36 @@ def acc_logout(request):
 
 @check_login()
 def index(request):
-	return render(request,"index.html")
+	hosts_count=models.HostList.objects.all().count()
+	assets_count=models.Assets.objects.all().count()
+	idcs_count=models.Idc.objects.all().count()
+	groups_count=models.Group.objects.all().count()
+	today = datetime.date.today()
+	date_list=[today - datetime.timedelta(days=6),today - datetime.timedelta(days=5),today - datetime.timedelta(days=4),today - datetime.timedelta(days=3),today - datetime.timedelta(days=2),today - datetime.timedelta(days=1),today]
+	asset_count_dic={}
+	asset_count_dic['name']=u'资产入库统计'
+	asset_count_dic['data']=[]
+	host_count_dic={}
+	host_count_dic['name']=u'主机添加统计'
+	host_count_dic['data']=[]
+	for i in date_list:
+		asset_count=models.Assets.objects.filter(create_time=i).count()
+		asset_count_dic['data'].append(asset_count)
+		host_count=models.HostList.objects.filter(create_time=i).count()
+		host_count_dic['data'].append(host_count)
+	series=[asset_count_dic,host_count_dic]
+	json_series=json.dumps(series,separators=(',',':'))
+	return render(request,"index.html",{'hosts_count':hosts_count,'assets_count':assets_count,'idcs_count':idcs_count,'groups_count':groups_count,'json_series':json_series})
 
 @check_login()
 def idc(request):
-	idc_obj=models.Idc.objects.all()
-	return render(request,'idc.html',{'idc_obj':idc_obj})
+	idc_obj,pager_str=paging(request,models.Idc.objects.all().count(),'idc',models.Idc.objects.all())
+	SearchIdcForm=search_idc_form.SearchIdcForm()
+	if request.method == 'POST':
+		search_idc=request.POST.get('search_idc')
+		search_idc_obj=models.Idc.objects.filter(idc_name__icontains=search_idc)
+		return render(request,'idc.html',{'idc_obj':idc_obj,'SearchIdcForm':SearchIdcForm,'search_idc_obj':search_idc_obj})
+	return render(request,'idc.html',{'idc_obj':idc_obj,'SearchIdcForm':SearchIdcForm,'pager_str':pager_str})
 
 @check_login()
 def create_idc(request):
@@ -93,10 +136,31 @@ def save_idc(request):
 
 @check_login()
 def host(request):
+	host_obj,pager_str=paging(request,models.HostList.objects.all().count(),'host',models.HostList.objects.all())
+	idc_id=0
+	group_obj=None
+	SearchHostForm=search_host_form.SearchHostForm()
+	if request.method == 'POST':
+		search_host=request.POST.get('search_host')
+		try:
+			idc_obj=models.Idc.objects.get(idc_name__icontains=search_host)
+		except Exception,e:
+			pass
+		else:
+			idc_id=idc_obj.id
+		try:
+			group_obj=models.Group.objects.get(name=search_host)
+		except Exception,e:
+			pass
+		if group_obj:
+			search_host_obj=group_obj.hostlist_set.all()
+		else:
+			search_host_obj=models.HostList.objects.filter(Q(number__icontains=search_host)|Q(InnerIp__icontains=search_host)|Q(OuterIp__icontains=search_host)|Q(hostname__icontains=search_host)|Q(application__icontains=search_host)|Q(idc_name_id=idc_id))
+		return render(request,'host.html',{'SearchHostForm':SearchHostForm,'search_host_obj':search_host_obj})
 	message=request.GET.get('message','')
-	host_obj=models.HostList.objects.all()
-	return render(request,'host.html',{'host_obj':host_obj,'message':message})
+	return render(request,'host.html',{'host_obj':host_obj,'SearchHostForm':SearchHostForm,'message':message,'pager_str':pager_str})
 
+@check_login()
 def delete_host(request):
 	if request.method == 'POST':
 		host_number=request.POST.get('number')
@@ -121,7 +185,6 @@ def modify_host(request):
 			message=u'修改成功'
 		else:
 			message=u'修改失败'
-		print message
 		return redirect("/cmdb/host/?message=%s" % message)
 	else:
 		HostForm=host_form.HostForm()
@@ -155,8 +218,45 @@ def create_host(request):
 
 @check_login()
 def asset_count(request):
-	asset_obj=models.Assets.objects.all()
-	return render(request,'asset_count.html',{'asset_obj':asset_obj})
+	asset_obj,pager_str=paging(request,models.Assets.objects.all().count(),'asset_count',models.Assets.objects.all())
+	export_csv_file=request.GET.get('file','')
+	if request.method == 'POST':
+		asset_number_id=0
+		search_asset=request.POST.get('search_asset')
+		try:
+			asset_number_obj=models.HostList.objects.get(number=search_asset)
+		except Exception,e:
+			pass
+		else:
+			asset_number_id=asset_number_obj.assets.asset_number_id
+		search_asset_obj=models.Assets.objects.filter(Q(asset_number_id=asset_number_id)|Q(hostname__icontains=search_asset)|Q(InnerIp__contains=search_asset)|Q(OuterIp__contains=search_asset)|Q(manufacturer__icontains=search_asset)|Q(productname__icontains=search_asset)|Q(os__icontains=search_asset))
+		return render(request,'asset_count.html',{'export_csv_file':export_csv_file,'search_asset_obj':search_asset_obj})
+	message=request.GET.get('message','')
+	return render(request,'asset_count.html',{'asset_obj':asset_obj,'message':message,'export_csv_file':export_csv_file,'pager_str':pager_str})
+
+@check_login()
+def export_asset(request):
+	if request.method == 'POST':
+		status={}
+		export_csv_file='%s/static/downloads/asset_%s.csv' % (settings.BASE_DIR,time.strftime("%Y%m%d%H%M%S"))
+		csvFile=open(export_csv_file,'wb')
+		csvWriter = csv.writer(csvFile)
+		asset_fields=['id','hostname','InnerIp','OuterIp','manufacturer','productname','sn','cpu_model','cpu_nums','cpu_cores','mem','disk','os']
+		csvWriter.writerow(asset_fields)
+		data=models.Assets.objects.all()
+		for item in data:
+			csvWriter.writerow([item.id,item.hostname,item.InnerIp,item.OuterIp,item.manufacturer,item.productname,item.sn,item.cpu_model,item.cpu_nums,item.cpu_cores,item.mem,item.disk,item.os])
+		csvFile.close()
+		if os.path.exists(export_csv_file):
+			status['message']=u'导出成功'
+			export_csv_file=os.path.basename(export_csv_file)
+			status['export_csv_file']=export_csv_file
+			json_result=json.dumps(status)
+			return HttpResponse(json_result)
+		else:
+			status['message']=u'导出失败'
+			json_result=json.dumps(status)
+			return HttpResponse(json_result)
 
 @check_login()
 def delete_asset(request):
@@ -173,10 +273,15 @@ def delete_asset(request):
 
 @check_login()
 def group_manage(request):
+	group_obj,pager_str=paging(request,models.Group.objects.all().count(),'group_manage',models.Group.objects.all())
+        GroupForm=group_form.GroupForm()
+        GroupSearchForm=group_search_form.GroupSearchForm()
+	if request.method == 'POST':
+		search_group_id=request.POST.get('group','')
+		search_group_obj=models.Group.objects.filter(id=search_group_id)
+		return render(request,"group_manage.html",{'group_obj':group_obj,'GroupForm':GroupForm,'GroupSearchForm':GroupSearchForm,'search_group_obj':search_group_obj})
 	message=request.GET.get('message','')
-	group_obj=models.Group.objects.all()
-	GroupForm=group_form.GroupForm()
-	return render(request,"group_manage.html",{'group_obj':group_obj,'GroupForm':GroupForm,'message':message})
+	return render(request,"group_manage.html",{'group_obj':group_obj,'GroupForm':GroupForm,'message':message,'GroupSearchForm':GroupSearchForm,'pager_str':pager_str})
 
 @check_login()
 def delete_group(request):
@@ -211,13 +316,18 @@ def show_hosts(request):
 def single_command(request):
 	SingleCommandForm=single_command_form.SingleCommandForm()
 	if request.method == 'POST':
-		f=open('logs/command.log','a')
+		#f=open('logs/command.log','a')
 		hostname_id=request.POST.get('hostname')
 		command=request.POST.get('command')
 		host_obj=models.HostList.objects.get(id=hostname_id)
 		hostname=host_obj.OuterIp
-		f.write("%s %s exec %s in %s\n" % (time.ctime(),request.user.userprofile.user,command,hostname))
-		f.close()
+		#f.write("%s %s exec %s in %s\n" % (time.ctime(),request.user.userprofile.user,command,hostname))
+		#f.close()
+		type='Single command'
+		name=request.user.userprofile.user
+		hostname=hostname
+		cmd=command
+		models.cmd_log.objects.create(type=type,name=name,hostname=hostname,cmd=cmd)
 		result=exec_cmd.ExecCommand(hostname,config.port,config.username,config.passwd,command)
 		json_result=json.dumps(result)
 		return render(request,'single_command.html',{'json_result':json_result,'SingleCommandForm':SingleCommandForm})
@@ -267,6 +377,11 @@ def put_files(request):
 		#for ret in result:
 		#	ret.get()
 		for item in host_lists:
+			type='Upload file'
+                	name=request.user.userprofile.user
+                	hostname=item.OuterIp
+                	cmd="Upload %s" % put_file
+                	models.cmd_log.objects.create(type=type,name=name,hostname=hostname,cmd=cmd)
 			ret=upload.UploadFiels(item.OuterIp,config.port,config.username,config.passwd,put_dir,dst_dir)
 			if ret:
 				result.append(ret)
@@ -295,6 +410,11 @@ def multi_command(request):
 		result={}
 		f=open('logs/multi_command.log','a')
 		for item in host_lists:
+			type='Multi command'
+                        name=request.user.userprofile.user
+                        hostname=item.OuterIp
+                        cmd=command
+                        models.cmd_log.objects.create(type=type,name=name,hostname=hostname,cmd=cmd)
 			ret=exec_cmd.ExecCommand(item.OuterIp,config.port,config.username,config.passwd,command)
 			result[item.OuterIp]=ret
 			f.write("%s %s exec %s in %s\n" % (time.ctime(),request.user.userprofile.user,command,item.OuterIp))
@@ -306,10 +426,31 @@ def multi_command(request):
 
 @check_login()
 def task(request):
+	SearchTaskForm=search_task_form.SearchTaskForm()
 	message=request.GET.get('message','')
-	task_obj=models.Task.objects.all()
 	TaskForm=task_form.TaskForm()
-	return render(request,'task.html',{'task_obj':task_obj,'TaskForm':TaskForm,'message':message})
+	if request.method == 'POST':
+		search_task=request.POST.get('search_task')
+		search_host_obj=models.HostList.objects.filter(Q(InnerIp__icontains=search_task)|Q(OuterIp__icontains=search_task))
+		if search_host_obj:
+			search_task_obj=[]
+			for item in search_host_obj:
+				search_host_obj2=models.HostList.objects.get(Q(InnerIp=item.InnerIp)|Q(OuterIp=item.OuterIp))
+				search_task_obj.append(search_host_obj2.task_set.all())
+			return render(request,'task.html',{'search_task_obj':search_task_obj,'TaskForm':TaskForm,'message':message,'SearchTaskForm':SearchTaskForm})
+		else:
+			if search_task.lower()=="false" or search_task.lower()=="true":
+				if search_task.lower()=="false":
+					search_task=0
+				else:
+					search_task=1
+				search_task_obj=models.Task.objects.filter(is_finished=search_task)
+				return render(request,'task.html',{'search_task_obj':search_task_obj,'TaskForm':TaskForm,'message':message,'SearchTaskForm':SearchTaskForm})
+			else:
+				search_task_obj=models.Task.objects.filter(Q(task_name__icontains=search_task)|Q(task__icontains=search_task)|Q(task_time__icontains=search_task))
+				return render(request,'task.html',{'search_task_obj':search_task_obj,'TaskForm':TaskForm,'message':message,'SearchTaskForm':SearchTaskForm})
+	task_obj,pager_str=paging(request,models.Task.objects.all().count(),'task',models.Task.objects.all())
+	return render(request,'task.html',{'task_obj':task_obj,'TaskForm':TaskForm,'message':message,'SearchTaskForm':SearchTaskForm,'pager_str':pager_str})
 
 @check_login()
 def create_task(request):
@@ -335,6 +476,11 @@ def create_task(request):
 		else:
 			task=task.replace('*','\*')
 			remote_cmd="echo %s >>/var/spool/cron/root" % task
+		type='Exec task'
+                name=request.user.userprofile.user
+                hostname=target_host
+                cmd="%s" % task
+                models.cmd_log.objects.create(type=type,name=name,hostname=hostname,cmd=cmd)	
 		result=exec_cmd.ExecCommand(target_host,config.port,config.username,config.passwd,remote_cmd)
 		if not result:
 			is_finished=1
@@ -407,3 +553,13 @@ def asset_collect(request):
 	message=request.GET.get('message','')
 	AssetCollectForm=asset_collect_form.AssetCollectForm()
 	return render(request,'asset_collect.html',{'AssetCollectForm':AssetCollectForm,'message':message})
+
+@check_login()
+def log_count(request):
+	SearchLogForm=search_log_form.SearchLogForm()
+	log_obj,pager_str=paging(request,models.cmd_log.objects.all().count(),'log_count',models.cmd_log.objects.all())
+	search_log_obj=None
+	if request.method == 'POST':
+		search_log=request.POST.get('search_log')
+		search_log_obj=models.cmd_log.objects.filter(Q(type__icontains=search_log)|Q(name__icontains=search_log)|Q(cmd__icontains=search_log)|Q(hostname__icontains=search_log))
+	return render(request,'log_count.html',{'log_obj':log_obj,'pager_str':pager_str,'SearchLogForm':SearchLogForm,'search_log_obj':search_log_obj})

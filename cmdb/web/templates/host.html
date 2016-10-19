@@ -9,33 +9,10 @@
 {% endblock %}
 {% block content %}
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	  <!--
-          <h1 class="page-header">Dashboard</h1>
-
-          <div class="row placeholders">
-            <div class="col-xs-6 col-sm-3 placeholder">
-              sdsfsfdd
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              erewere
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              sdsfds
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              sfsdfds
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-   	</div>
-	--!>
 	<a href='/cmdb/create_host/'><input type='button' value='添加主机'/></a>
+	<form action="/cmdb/host/" method='post' style="margin-top:10px">{% csrf_token %}
+		<p>{{SearchHostForm.search_host}} <input type='submit' value='搜索' /></p>
+	</form>
 	<div class="table-responsive" style='margin-top:10px'>
 		<table class="table table-striped" border='1'>
 		  <thead>
@@ -46,16 +23,24 @@
                       <th>外网IP</th>
                       <th>主机名</th>
                       <th>运行服务</th>
+                      <th>业务线</th>
                       <th>所在机房</th>
                       <th>操作</th>
       		    </tr>
                  </thead>
                  <tbody>
-      		   {% for item in host_obj %}
-        	     <tr><td>{{forloop.counter}}</td><td>{{item.number}}</td><td edited='1'>{{item.InnerIp}}</td><td edited='1'>{{item.OuterIp}}</td><td edited='1'>{{item.hostname}}</td><td edited='1'>{{item.application}}</td><td selected_type='1'>{{item.idc_name.idc_name}}</td><td><a href='/cmdb/modify_host?id={{item.id}}'>编辑</a><a onclick="delete_host(this)" style='margin-left:10px'>删除</a></td></tr>
-                   {% endfor %}
+		   {% if search_host_obj %}
+			{% for item in search_host_obj %}
+				<tr><td>{{forloop.counter}}</td><td>{{item.number}}</td><td>{{item.InnerIp}}</td><td>{{item.OuterIp}}</td><td>{{item.hostname}}</td><td>{{item.application}}</td><td>{% for g in item.group.all  %} {{ g.name }} {% endfor %}</td><td>{{item.idc_name.idc_name}}</td><td><a href='/cmdb/modify_host?id={{item.id}}'>编辑</a><a onclick="delete_host(this)" style='margin-left:10px'>删除</a></td></tr>
+			{% endfor %}
+		   {% else %}
+      		     {% for item in host_obj %}
+        	       <tr><td>{{forloop.counter}}</td><td>{{item.number}}</td><td>{{item.InnerIp}}</td><td>{{item.OuterIp}}</td><td>{{item.hostname}}</td><td>{{item.application}}</td><td>{% for g in item.group.all  %} {{ g.name }} {% endfor %}</td><td>{{item.idc_name.idc_name}}</td><td><a href='/cmdb/modify_host?id={{item.id}}'>编辑</a><a onclick="delete_host(this)" style='margin-left:10px'>删除</a></td></tr>
+                     {% endfor %}
+		   {% endif %}
                  </tbody>
                </table>
+	       <div style="float:right">{{pager_str}}</div>
 	</div>
 </div>
 {% endblock %}
