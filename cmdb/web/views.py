@@ -316,13 +316,13 @@ def show_hosts(request):
 def single_command(request):
 	SingleCommandForm=single_command_form.SingleCommandForm()
 	if request.method == 'POST':
-		#f=open('logs/command.log','a')
+		f=open('logs/single_command.log','a')
 		hostname_id=request.POST.get('hostname')
 		command=request.POST.get('command')
 		host_obj=models.HostList.objects.get(id=hostname_id)
 		hostname=host_obj.OuterIp
-		#f.write("%s %s exec %s in %s\n" % (time.ctime(),request.user.userprofile.user,command,hostname))
-		#f.close()
+		f.write("%s %s exec %s in %s\n" % (time.ctime(),request.user.userprofile.user,command,hostname))
+		f.close()
 		type='Single command'
 		name=request.user.userprofile.user
 		hostname=hostname
