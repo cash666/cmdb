@@ -21,6 +21,9 @@ import csv
 # Create your views here.
 
 def paging(request,obj1,url,obj2):
+	'''
+	分页
+	'''
 	current_page=int(request.GET.get('page',1))
 	count=obj1
         page_nums=int(count)
@@ -36,6 +39,9 @@ def paging(request,obj1,url,obj2):
         return result
 
 def check_login():
+	'''
+	装饰器检查登录
+	'''
         def decorator(func):
                 def wrapper(request):
                         if request.user.is_authenticated:
@@ -46,6 +52,9 @@ def check_login():
         return decorator
 
 def acc_login(request):
+	'''
+	登录
+	'''
 	message=''
         if request.method == 'POST':
                 username=request.POST.get('username')
@@ -64,6 +73,9 @@ def acc_logout(request):
 
 @check_login()
 def index(request):
+	'''
+	首页
+	'''
 	hosts_count=models.HostList.objects.all().count()
 	assets_count=models.Assets.objects.all().count()
 	idcs_count=models.Idc.objects.all().count()
@@ -87,21 +99,33 @@ def index(request):
 
 @check_login()
 def idc(request):
+	'''
+	idc
+	'''
 	idc_obj,pager_str=paging(request,models.Idc.objects.all().count(),'idc',models.Idc.objects.all())
 	SearchIdcForm=search_idc_form.SearchIdcForm()
 	if request.method == 'POST':
-		search_idc=request.POST.get('search_idc')
+		SearchIdcList=search_idc_form.SearchIdcForm(request.POST)
+		if SearchIdcList.is_valid():
+			data=SearchIdcList.clean()
+			search_idc=data['search_idc']
 		search_idc_obj=models.Idc.objects.filter(idc_name__icontains=search_idc)
 		return render(request,'idc.html',{'idc_obj':idc_obj,'SearchIdcForm':SearchIdcForm,'search_idc_obj':search_idc_obj})
 	return render(request,'idc.html',{'idc_obj':idc_obj,'SearchIdcForm':SearchIdcForm,'pager_str':pager_str})
 
 @check_login()
 def create_idc(request):
+	'''
+	添加idc
+	'''
 	IDCForm=idc_form.IDCForm(request.POST)
 	message=''
 	if request.method == 'POST':
-		idc_name=request.POST.get('idc_name')
-		remark=request.POST.get('remark')
+		IDCList=idc_form.IDCForm(request.POST)
+		if IDCList.is_valid():
+			data=IDCList.clean()
+			idc_name=data['idc_name']
+			remark=data['remark']
 		idc_info={'idc_name':idc_name,'remark':remark}
 		is_ok=models.Idc.objects.create(**idc_info)
 		if is_ok:
@@ -112,6 +136,9 @@ def create_idc(request):
 
 @check_login()
 def delete_idc(request):
+	'''
+	删除idc
+	'''
 	if request.method == 'POST':
 		idc_id=request.POST.get('id')
 		is_ok=models.Idc.objects.filter(id=idc_id).delete()
@@ -123,6 +150,9 @@ def delete_idc(request):
 
 @check_login()
 def save_idc(request):
+	'''
+	保存修改后的idc信息
+	'''
 	if request.method == 'POST':
 		idc_id=int(request.POST.get('id'))
                 idc_name=request.POST.get('idc_name')
@@ -136,12 +166,18 @@ def save_idc(request):
 
 @check_login()
 def host(request):
+	'''
+	主机
+	'''
 	host_obj,pager_str=paging(request,models.HostList.objects.all().count(),'host',models.HostList.objects.all())
 	idc_id=0
 	group_obj=None
 	SearchHostForm=search_host_form.SearchHostForm()
 	if request.method == 'POST':
-		search_host=request.POST.get('search_host')
+		SearchHostList=search_host_form.SearchHostForm(request.POST)
+		if SearchHostList.is_valid():
+			data=SearchHostList.clean()
+			search_host=data['search_host']
 		try:
 			idc_obj=models.Idc.objects.get(idc_name__icontains=search_host)
 		except Exception,e:
@@ -162,6 +198,9 @@ def host(request):
 
 @check_login()
 def delete_host(request):
+	'''
+	删除主机
+	'''
 	if request.method == 'POST':
 		host_number=request.POST.get('number')
 		is_ok=models.HostList.objects.filter(number=host_number).delete()
@@ -173,6 +212,9 @@ def delete_host(request):
 
 @check_login()
 def modify_host(request):
+	'''
+	修改主机信息
+	'''
 	if request.method == 'POST':
 		number=request.POST.get('number')
 		InnerIp=request.POST.get('InnerIp')
@@ -194,6 +236,9 @@ def modify_host(request):
 
 @check_login()
 def create_host(request):
+	'''
+	添加主机信息
+	'''
 	if request.method == 'POST':
 		number=request.POST.get('number')
                 InnerIp=request.POST.get('InnerIp')
@@ -218,6 +263,9 @@ def create_host(request):
 
 @check_login()
 def asset_count(request):
+	'''
+	资产审计
+	'''
 	asset_obj,pager_str=paging(request,models.Assets.objects.all().count(),'asset_count',models.Assets.objects.all())
 	export_csv_file=request.GET.get('file','')
 	if request.method == 'POST':
@@ -236,6 +284,9 @@ def asset_count(request):
 
 @check_login()
 def export_asset(request):
+	'''
+	导出资产列表
+	'''
 	if request.method == 'POST':
 		status={}
 		export_csv_file='%s/static/downloads/asset_%s.csv' % (settings.BASE_DIR,time.strftime("%Y%m%d%H%M%S"))
@@ -260,6 +311,9 @@ def export_asset(request):
 
 @check_login()
 def delete_asset(request):
+	'''
+	删除资产
+	'''
 	if request.method == 'POST':
 		asset_number=request.POST.get('asset_number')
 		asset_number_obj=models.HostList.objects.get(number=asset_number)
@@ -273,11 +327,17 @@ def delete_asset(request):
 
 @check_login()
 def group_manage(request):
+	'''
+	主机组管理
+	'''
 	group_obj,pager_str=paging(request,models.Group.objects.all().count(),'group_manage',models.Group.objects.all())
         GroupForm=group_form.GroupForm()
         GroupSearchForm=group_search_form.GroupSearchForm()
 	if request.method == 'POST':
-		search_group_id=request.POST.get('group','')
+		GroupSearchList=group_search_form.GroupSearchForm(request.POST)
+		if GroupSearchList.is_valid():
+			data=GroupSearchList.clean()
+			search_group_id=data['group']
 		search_group_obj=models.Group.objects.filter(id=search_group_id)
 		return render(request,"group_manage.html",{'group_obj':group_obj,'GroupForm':GroupForm,'GroupSearchForm':GroupSearchForm,'search_group_obj':search_group_obj})
 	message=request.GET.get('message','')
@@ -285,6 +345,9 @@ def group_manage(request):
 
 @check_login()
 def delete_group(request):
+	'''
+	删除主机组信息
+	'''
 	if request.method == 'POST':
 		group_name=request.POST.get('name')
 		is_ok=models.Group.objects.filter(name=group_name).delete()
@@ -296,6 +359,9 @@ def delete_group(request):
 
 @check_login()
 def create_group(request):
+	'''
+	添加主机组信息
+	'''
 	if request.method == 'POST':
                 group_name=request.POST.get('group_name')
 		is_ok=models.Group.objects.create(name=group_name)
@@ -307,6 +373,9 @@ def create_group(request):
 
 @check_login()	
 def show_hosts(request):
+	'''
+	查看主机组所属主机信息
+	'''
 	id=request.GET.get('id')
 	group_obj=models.Group.objects.get(id=id)
 	hosts_list=group_obj.hostlist_set.all()
@@ -314,11 +383,17 @@ def show_hosts(request):
 
 @check_login()
 def single_command(request):
+	'''
+	单台主机执行命令
+	'''
 	SingleCommandForm=single_command_form.SingleCommandForm()
 	if request.method == 'POST':
+		SingleCommandList=single_command_form.SingleCommandForm(request.POST)
+		if SingleCommandList.is_valid():
+			data=SingleCommandList.clean()
+			hostname_id=data['hostname']
+			command=data['command']
 		f=open('logs/single_command.log','a')
-		hostname_id=request.POST.get('hostname')
-		command=request.POST.get('command')
 		host_obj=models.HostList.objects.get(id=hostname_id)
 		hostname=host_obj.OuterIp
 		f.write("%s %s exec %s in %s\n" % (time.ctime(),request.user.userprofile.user,command,hostname))
@@ -336,6 +411,9 @@ def single_command(request):
 
 @check_login()
 def upload_files(request):
+	'''
+	上传需要推送的文件
+	'''
 	if request.method == 'POST':
 		file_obj=request.FILES.get('uploadFile','')
 		if file_obj:
@@ -355,14 +433,20 @@ def upload_files(request):
 	
 @check_login()
 def put_files(request):
+	'''
+	推送文件
+	'''
 	PutFileForm=put_file_form.PutFileForm()	
 	if request.method == 'POST':
-		group_id=request.POST.get('host_groups')
-		put_file_id=request.POST.get('put_files')
+		PutFileList=put_file_form.PutFileForm(request.POST)
+		if PutFileList.is_valid():
+			data=PutFileList.clean()
+			group_id=data['host_groups']
+			put_file_id=data['put_files']
+			dst_dir=data['put_dir']
 		put_file_obj=models.Upload.objects.get(id=put_file_id)
 		put_file=put_file_obj.headImg
 		put_dir="%s/%s" % (settings.BASE_DIR,put_file)
-		dst_dir=request.POST.get('put_dir')
 		group_obj=models.Group.objects.get(id=group_id)
 		host_lists=group_obj.hostlist_set.all()
 		hosts_count=group_obj.hostlist_set.all().count()
@@ -401,12 +485,18 @@ def put_files(request):
 
 @check_login()
 def multi_command(request):
+	'''
+	批量主机命令执行
+	'''
 	MultiCommandForm=multi_command_form.MultiCommandForm()
 	if request.method == 'POST':
-		group_id=request.POST.get('group')
+		MultiCommandList=multi_command_form.MultiCommandForm(request.POST)
+		if MultiCommandList.is_valid():
+			data=MultiCommandList.clean()
+			group_id=data['group']
+			command=data['command']
 		group_obj=models.Group.objects.get(id=group_id)
                 host_lists=group_obj.hostlist_set.all()
-		command=request.POST.get('command')
 		result={}
 		f=open('logs/multi_command.log','a')
 		for item in host_lists:
@@ -426,11 +516,17 @@ def multi_command(request):
 
 @check_login()
 def task(request):
+	'''
+	定时任务
+	'''
 	SearchTaskForm=search_task_form.SearchTaskForm()
 	message=request.GET.get('message','')
 	TaskForm=task_form.TaskForm()
 	if request.method == 'POST':
-		search_task=request.POST.get('search_task')
+		SearchTaskList=search_task_form.SearchTaskForm(request.POST)
+		if SearchTaskList.is_valid():
+			data=SearchTaskList.clean()
+			search_task=data['search_task']
 		search_host_obj=models.HostList.objects.filter(Q(InnerIp__icontains=search_task)|Q(OuterIp__icontains=search_task))
 		if search_host_obj:
 			search_task_obj=[]
@@ -454,6 +550,9 @@ def task(request):
 
 @check_login()
 def create_task(request):
+	'''
+	添加定时任务
+	'''
 	if request.method == 'POST':
 		task_name=request.POST.get('task_name')
 		task=request.POST.get('task')
@@ -500,6 +599,9 @@ def create_task(request):
 
 @check_login()
 def delete_task(request):
+	'''
+	删除定时任务
+	'''
 	if request.method == 'POST':
 		task_name=request.POST.get('task_name')
                 task=request.POST.get('task')
@@ -513,6 +615,9 @@ def delete_task(request):
 
 @check_login()
 def asset_collect(request):
+	'''
+	资产采集
+	'''
 	if request.method == 'POST':
 		hostname_id=request.POST.get('hostname')
 		hostname_obj=models.HostList.objects.get(id=hostname_id)
@@ -526,8 +631,12 @@ def asset_collect(request):
 			if os.path.exists(pk_file) and os.path.getsize(pk_file)>0:
 				with open(pk_file,'r') as f:
 					asset_info=pickle.load(f)
+					OuterIp=asset_info['OuterIp']
+					count=models.Assets.objects.filter(OuterIp=OuterIp).count()
 				if time.time()-float(asset_info['timestamp']) > 300:
 					message=u'资产文件已过期'
+				elif int(count)>0:
+					message=u'资产已经存在'
 				else:
 					hostname=asset_info['hostname']
 					InnerIp=asset_info['InnerIp']
@@ -556,10 +665,16 @@ def asset_collect(request):
 
 @check_login()
 def log_count(request):
+	'''
+	日志审计
+	'''
 	SearchLogForm=search_log_form.SearchLogForm()
 	log_obj,pager_str=paging(request,models.cmd_log.objects.all().count(),'log_count',models.cmd_log.objects.all())
 	search_log_obj=None
 	if request.method == 'POST':
-		search_log=request.POST.get('search_log')
+		SearchLogList=search_log_form.SearchLogForm(request.POST)
+		if SearchLogList.is_valid():
+			data=SearchLogList.clean()
+			search_log=data['search_log']
 		search_log_obj=models.cmd_log.objects.filter(Q(type__icontains=search_log)|Q(name__icontains=search_log)|Q(cmd__icontains=search_log)|Q(hostname__icontains=search_log))
 	return render(request,'log_count.html',{'log_obj':log_obj,'pager_str':pager_str,'SearchLogForm':SearchLogForm,'search_log_obj':search_log_obj})
