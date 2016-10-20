@@ -17,5 +17,3 @@ def UploadFiels(hostname,port,username,passwd,src_file,dst_file):
 		t.close()
 	finally:
 		return result
-
-#UploadFiels('192.168.47.154',22122,'root','caoshuai666','/root/1.txt','/tmp/2.txt')
