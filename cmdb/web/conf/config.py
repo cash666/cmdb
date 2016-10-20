@@ -1,3 +1,3 @@
 port=22122
 username='root'
-passwd='caoshuai666'
+passwd='12345'
