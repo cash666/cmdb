@@ -1,4 +1,4 @@
-该cmdb采用bootstrape+Jquey+python+django的形式编写完成 主要功能有: 
+该cmdb采用bootstrap+JQ+python+django的形式编写完成 主要功能有: 
 
 1，采用django自带的用户认证机制；
 2，主机，业务线和机房的添加，修改，删除和模糊搜索；
